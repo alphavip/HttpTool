@@ -1,2 +1,2 @@
-# Test
-测试项目
+# HttpSendTool
+支持.net 2.0及以上
