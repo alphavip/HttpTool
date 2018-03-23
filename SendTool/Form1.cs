@@ -37,8 +37,8 @@ namespace SendTool
         public Form1()
         {
             InitializeComponent();
-            this.textURL.Text = "http://[IP]:8765/FileTransfer/FileTransfer/UploadFile";
-            this.textFilePath.Text = "上传的文件路径";
+            this.textURL.Text = @"http://[IP]:8765/";
+            this.textFilePath.Text = @"上传文件的全路径路径";
             this.textFilePath.Enabled = false;
             this.textAppKey.Enabled = false;
             this.textAppSecret.Enabled = false;
@@ -98,7 +98,7 @@ namespace SendTool
         {
             string result = string.Empty;
 
-            HttpWebRequest httpWebRequest = CreateWebRequest(contentType,"POST", requestBytes, enableSignature);
+            HttpWebRequest httpWebRequest = CreateWebRequest(contentType,"POST", requestBytes);
 
             try
             {
@@ -123,7 +123,7 @@ namespace SendTool
         {
             string result = string.Empty;
 
-            HttpWebRequest httpWebRequest = CreateWebRequest(contentType, "GET", null, enableSignature);
+            HttpWebRequest httpWebRequest = CreateWebRequest(contentType, "GET", null);
 
             try
             {
@@ -150,16 +150,22 @@ namespace SendTool
         /// </summary>
         /// <param name="enableSignature"></param>
         /// <returns></returns>
-        private HttpWebRequest CreateWebRequest(string contentType,string method, Byte[] contentBytes, bool enableSignature)
+        private HttpWebRequest CreateWebRequest(string contentType,string method, Byte[] contentBytes)
         {
             HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(URL);
             
-            if (enableSignature)
+            if (EnableSignature)
             {
                 //Add request hearder
                 httpWebRequest.Headers.Add("HiAuthVersion", "1.1");//Add Version
                 httpWebRequest.Headers.Add("HiAuthAppKey", AppKey);//Add AppKey
-                string requestBody = contentBytes != null?PercentEncode(Convert.ToBase64String(contentBytes)):"";
+                string requestBody;
+                if (EnableUploadFile)
+                requestBody = contentBytes != null?PercentEncode(Convert.ToBase64String(contentBytes)):"";
+                else
+                {
+                    requestBody = contentBytes != null ? Encoding.UTF8.GetString(contentBytes):"";
+                }
                 string appSignature = CreateDigitalSignature(URL, method, requestBody, AppSecret);
                 httpWebRequest.Headers.Add("HiAuthAppSignature", appSignature);//Add AppSecret
             }
